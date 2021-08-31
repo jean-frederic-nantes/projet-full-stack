@@ -22,66 +22,6 @@
   <body>
     <div class="container">
       <div class="offset-3 col-6 pt-4">
-        <input id="article" placeholder="Ajouter un article" />
-        <button class="btn btn-success">
-          <i class="fa fa-plus"></i>
-        </button>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Article</th>
-              <th>Etat</th>
-              <th colspan="2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Pomme</td>
-              <td>true</td>
-              <td>
-                <button class="btn btn-primary">
-                  <i class="fa fa-check"></i>
-                </button>
-              </td>
-              <td>
-                <button class="btn btn-danger">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-
-            <tr>
-              <td>kiwi</td>
-              <td>false</td>
-              <td>
-                <button class="btn btn-primary">
-                  <i class="fa fa-check"></i>
-                </button>
-              </td>
-              <td>
-                <button class="btn btn-danger">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-
-            <tr>
-              <td>poire</td>
-              <td>true</td>
-              <td>
-                <button class="btn btn-primary">
-                  <i class="fa fa-check"></i>
-                </button>
-              </td>
-              <td>
-                <button class="btn btn-danger">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <hr />
         <!-- integration du tableau avec template-->
         <br /><br />
         <button class="btn btn-success" onclick="ajouter()">
@@ -103,10 +43,10 @@
     <!-- Template-->
     <template id="ligneTableau">
       <tr>
-        <td>poire</td>
-        <td>true</td>
+        <td class="name">poire</td>
+        <td class="status">true</td>
         <td>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" onclick="check(this)">
             <i class="fa fa-check"></i>
           </button>
         </td>
@@ -117,14 +57,50 @@
         </td>
       </tr>
     </template>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+      integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
     <script>
-      function ajouter() {
-        let tbody = document.getElementById("tbody");
+      let url = "http://localhost/prj-full-stack/backend/public/api/article";
+      //----------------------
+      function getLigne(article) {
         let template = document.getElementById("ligneTableau");
         // je clone le template
         let clone = template.content.cloneNode(true);
         // je met le clone dans le tbody
-        tbody.appendChild(clone);
+        clone.querySelector(".name").innerHTML = article.name;
+        clone.querySelector(".status").innerHTML = article.isBought;
+        clone.querySelector(".btn-primary").setAttribute("data-id", article.id);
+        return clone; //<tr>...</tr>
+      }
+
+      function ajouter() {
+        let tbody = document.getElementById("tbody");
+        let article = { id: 0, name: "mangue", isBought: false };
+        let tr = getLigne(article);
+        tbody.appendChild(tr);
+      }
+      // Rechercher le tableau JS de articles.
+      axios.get(url).then((response) => {
+        let articles = response.data;
+        //console.log(articles);
+        for (let article of articles) {
+          console.log(article);
+          let tr = getLigne(article);
+          tbody.appendChild(tr);
+        }
+      });
+      function check(element) {
+        let id = element.getAttribute("data-id");
+        console.log(id);
+        //element.remove(); // effacer le bouton
+        // effacer le tr
+        // btn ->td -> tr
+        element.parentElement.parentElement.remove();
       }
     </script>
   </body>
