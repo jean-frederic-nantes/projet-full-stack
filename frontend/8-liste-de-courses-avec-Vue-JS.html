@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Création d'un tableau HTML avec JS</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      .barre {
+        text-decoration: line-through;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- pour twig {% verbatim %} -->
+    <div class="container" id="app">
+      <div class="offset-3 col-6 pt-4">
+        <!-- integration du tableau avec template-->
+        <br /><br />
+        <input v-model="nom" placeholder="Saisir un article" />
+        <button class="btn btn-success" @click="ajouter()">
+          <i class="fa fa-plus"></i>
+        </button>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Article</th>
+
+              <th colspan="2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(a,indice) of articles"
+              :class="{ 'table-danger': a.isBought }"
+            >
+              <td :class="{ 'barre' : a.isBought }">{{ a.name}}</td>
+
+              <td>
+                <button class="btn btn-primary" @click="acheter(indice,a.id)">
+                  <i class="fa fa-check"></i>
+                </button>
+              </td>
+              <td>
+                <button class="btn btn-danger" @click="effacer(indice,a.id)">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- {% endverbatim %} -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+      integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+    <!-- {% verbatim %} -->
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+          nom: "",
+          url: "http://localhost/prj-full-stack/backend/public/api/article",
+          articles: [],
+        },
+        methods: {
+          ajouter() {
+            //let body = { "name"  : "test"};
+            let body = { name: this.nom };
+            this.nom = ""; // je vide le champ input
+            axios.post(this.url, body).then((response) => {
+              let article = response.data;
+              this.articles.push(article);
+            });
+          },
+          effacer(indice, id) {
+            let url2 = this.url + "/" + id;
+            axios.delete(url2).then((response) => {
+              this.articles.splice(indice, 1);
+            });
+          },
+          acheter(indice, id) {
+            let url2 = this.url + "/" + id;
+            axios.put(url2).then((response) => {
+              let article = response.data; // objet.isBought
+              this.articles[indice].isBought = article.isBought;
+            });
+          },
+        },
+        mounted() {
+          axios.get(this.url).then((response) => {
+            this.articles = response.data;
+            console.log(this.articles);
+          });
+        },
+      });
+    </script>
+    <!-- {% endverbatim %} -->
+  </body>
+</html>
